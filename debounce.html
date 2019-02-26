@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  防抖
+  <input type="text" id="debounce">
+  <script>
+    function shotCat(content) {
+      console.log('shotCat出品,必属精品!必须点赞!(滑稽)', content);
+    }
+    // 
+    function debounce(fun, delay=500, immediate=true) {
+      let timer = null;
+      return function(args) {
+        let that = this;
+        let _args = args;
+        if (timer) clearTimeout(timer);
+        if (immediate) { // 立即执行
+          if (!timer) fun.call(that, _args); // 如果定时器不存在,则说明延时已过,可以立即执行函数
+          timer = setTimeout(function() {
+            timer = null; // 到时间后,定时器自动设为null,不仅方便判断定时器状态还能避免内存泄露
+          }, delay);
+        } else { // 非立即执行,则重新设定定时器,并将回调函数放入其中
+          timer = setTimeout(function(){
+            fun.call(that, _args);
+          }, delay);
+        }
+      }
+    }
+
+    let debounceShotCat = debounce(shotCat, 500);
+    // 添加事件监听 回调debounceShotCat 并传入事件返回的对象
+    let input = document.getElementById('debounce');
+    input.addEventListener('keyup', function (e) {
+      debounceShotCat(e.target.value);
+    });
+
+  </script>
+</body>
+</html>

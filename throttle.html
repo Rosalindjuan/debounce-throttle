@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <h1>节流</h1>
+  <div>与防抖比较:</div>
+  <div>防抖是将多次执行变为最后一次执行，节流是将多次执行变为在规定时间内只执行一次.一般不会重置定时器. 即不会if (timer) clearTimeout(timer);(时间戳+定时器版除外)</div>
+  <h2>应用场景:</h2>
+  <div>两个条件:</div>
+  <div>1,客户连续频繁地触发事件</div>
+  <div>2,客户不再只关心"最后一次"操作后的结果反馈.而是在操作过程中持续的反馈.</div>
+  <div>例如:</div>
+  <div>鼠标不断点击触发，点击事件在规定时间内只触发一次(单位时间内只触发一次)</div>
+  <div>监听滚动事件，比如是否滑到底部自动加载更多，用throttle来判断</div>
+
+  <!-- <input type="text" id="debounce"> -->
+  <button id="throttle">click me</button>
+  <script>
+    // 时间戳
+    function throttleTimestamp(fun, delay=500) {
+      let prev = 0;
+      return function(args) {
+        let now = Date.now();
+        let that = this;
+        let _args = args;
+        if(now - prev > delay) {
+          fun.apply(that, _args);
+          prev = now;
+        }
+      }
+    }
+    // 定时器
+    function throttleTimer(fun, delay=500) {
+      let timer;
+      return function(args) {
+        let that = this;
+        let _args = args;
+        if (!timer) {
+          timer = setTimeout(function() {
+            timer = null;
+            fun.apply(that, _args);
+          }, delay);
+        }
+      }
+    }
+    // 时间戳+定时器 实现第一次触发可以立即响应,结束触发后也能有响应 (该版才是最符合实际工作需求)
+    // 该版主体思路还是时间戳版,定时器的作用仅仅是执行最后一次回调
+    function throttle(fun, delay=500) {
+      let timer = null;
+      let prev = 0;
+      return function(args) {
+        let now = Date.now();
+        let remaining = delay - (now-prev); // 距离规定时间,还剩多少时间
+        let that = this;
+        let _args = args;
+        clearTimeout(timer);//清除之前设置的定时器
+        console.log(remaining);
+        if (remaining <= 0) {
+          fun.call(that, _args);
+          prev = Date.now();
+        } else {
+          console.log(999);
+          timer = setTimeout(function() {
+            fun.call(that, '123');
+          }, remaining);//因为上面添加的clearTimeout.实际这个定时器只有最后一次才会执行
+        }
+      }
+    }
+
+    function shotCat(content) {
+      console.log('shotCat出品,必属精品!必须点赞!(滑稽)', content);
+    }
+
+    let button = document.getElementById('throttle');
+
+    let throttleShotCat = throttle(shotCat, 2000);
+    button.onclick = function() {
+      throttleShotCat('sdsd');
+    }
+
+  </script>
+</body>
+</html>
